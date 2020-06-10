@@ -14,23 +14,25 @@ function parseMatches(matches, content, pluginConfig) {
   return content;
 }
 
-module.exports = function (eleventyConfig, options) {
-  const pluginConfig = Object.assign(pluginDefaults, options);
-  eleventyConfig.addTransform("embedYouTube", async (content, outputPath) => {
-    if (outputPath && outputPath.endsWith(".html")) {
-      const $ = cheerio.load(content);
+module.exports = {
+  configFunction: function (eleventyConfig, options) {
+    const pluginConfig = Object.assign(pluginDefaults, options);
+    eleventyConfig.addTransform("embedYouTube", async (content, outputPath) => {
+      if (outputPath && outputPath.endsWith(".html")) {
+        const $ = cheerio.load(content);
 
-      $(pluginConfig.only).each(function (ii, el) {
-        const html = $.html($(this));
-        const matches = patternPresent(html);
-        const newContent = matches ? parseMatches(matches, html, pluginConfig) : html;
-        $(newContent).insertBefore($(this));
-        $(this).remove();
-      });
+        $(pluginConfig.only).each(function (ii, el) {
+          const html = $.html($(this));
+          const matches = patternPresent(html);
+          const newContent = matches ? parseMatches(matches, html, pluginConfig) : html;
+          $(newContent).insertBefore($(this));
+          $(this).remove();
+        });
 
-      return $.html();
-    }
+        return $.html();
+      }
 
-    return content;
-  });
-};
+      return content;
+    });
+  };
+}
